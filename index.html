@@ -1,18 +1,599 @@
-<html>
-  <head>
-    <title>Asmin's Portfolio</title>
-  </head
-  <body>
-    <div>My Projects</div>
-    <ul>
-      <li><a href="https://asminbudha.github.io/js-experiment/ast1/">Image Slider</a></li>
-      <li><a href="https://asminbudha.github.io/js-experiment/ast2/">Ball Collision</a></li>
-      <li><a href="https://asminbudha.github.io/js-experiment/ast3/">Flappy Bird</a></li>
-      <li><a href="https://asminbudha.github.io/js-experiment/ast4/">Typing Tutor</a></li>
-      <li><a href="https://asminbudha.github.io/TuTangle/">TuTangle</a></li>
-      <li><a href="https://asminbudha.github.io/portland/">Portland UI</a></li>
-      <li><a href="https://asminbudha.github.io/car-race/">Car Race</a></li>
-      <li><a href="https://asminbudha.github.io/todo/">Todo App</a></li>
-    </ul>
-  </body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asmin Budha - Senior Software Developer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg:      #0b0b0d;
+            --bg-2:    #111116;
+            --bg-3:    #18181f;
+            --cyan:    #00d9ff;
+            --txt-1:   #ededf0;
+            --txt-2:   #8a8f9e;
+            --txt-3:   #484d5c;
+            --border:  rgba(255,255,255,0.07);
+            --b-cyan:  rgba(0,217,255,0.15);
+            --glow:    rgba(0,217,255,0.18);
+            --card:    rgba(17,17,22,0.9);
+        }
+
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+        html { scroll-behavior:smooth; }
+
+        body {
+            font-family:'Inter',sans-serif;
+            background:var(--bg);
+            color:var(--txt-1);
+            line-height:1.6;
+            overflow-x:hidden;
+            font-size:15px;
+        }
+
+        /* ── Background: radial stage-light + floating glows ── */
+        .bg-scene {
+            position:fixed; inset:0; z-index:0; pointer-events:none;
+            /* Noise texture */
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+            background-size: 256px 256px;
+        }
+        /* Top-center spotlight */
+        .bg-scene::before {
+            content:'';
+            position:absolute; inset:0;
+            background:
+                radial-gradient(ellipse 70% 45% at 50% -5%,  rgba(0,217,255,0.06) 0%, transparent 70%),
+                radial-gradient(ellipse 40% 35% at  5%  60%, rgba(0,217,255,0.03) 0%, transparent 60%);
+        }
+        /* Floating glow orbs */
+        .orb {
+            position:fixed; border-radius:50%;
+            filter:blur(120px); pointer-events:none; z-index:1;
+            animation:drift 26s ease-in-out infinite;
+        }
+        .orb-1 { width:500px;height:500px; background:rgba(0,217,255,0.10); top:-200px;  right:-150px; }
+        .orb-2 { width:380px;height:380px; background:rgba(0,217,255,0.06); bottom:-150px; left:-100px; animation-direction:reverse; animation-duration:19s; }
+        @keyframes drift {
+            0%,100% { transform:translate(0,0); }
+            50%      { transform:translate(35px,45px); }
+        }
+
+        /* ── Full-width wrapper ── */
+        .wrap {
+            width:100%;
+            padding: 0 max(2rem, 5vw);
+            position:relative; z-index:2;
+        }
+        header .wrap, footer .wrap { max-width:none; }
+
+        /* ── Header ── */
+        header {
+            position:sticky; top:0; z-index:200;
+            background:rgba(11,11,13,0.80);
+            backdrop-filter:blur(16px) saturate(180%);
+            border-bottom:1px solid var(--border);
+        }
+        nav {
+            display:flex; justify-content:space-between; align-items:center;
+            padding:0.85rem 0;
+            max-width:1400px; margin:0 auto;
+        }
+        .logo {
+            font-family:'JetBrains Mono',monospace;
+            font-size:1.05rem; font-weight:600; color:var(--cyan);
+            text-shadow:0 0 20px var(--glow);
+            letter-spacing:-0.02em;
+        }
+        .nav-links { display:flex; gap:1.25rem; list-style:none; align-items:center; }
+        .nav-links a {
+            color:var(--txt-2); text-decoration:none;
+            font-family:'JetBrains Mono',monospace; font-size:0.77rem;
+            transition:color 0.2s;
+        }
+        .nav-links a:hover { color:var(--txt-1); }
+        .nav-resume {
+            padding:0.32rem 0.85rem !important;
+            border:1px solid rgba(0,217,255,0.4) !important;
+            border-radius:6px; color:var(--cyan) !important;
+            transition:background 0.2s !important;
+        }
+        .nav-resume:hover { background:rgba(0,217,255,0.08) !important; }
+
+        /* ── Page body ── */
+        .page {
+            max-width:1400px;
+            margin:0 auto;
+        }
+
+        /* ── Hero ── */
+        .hero {
+            display:grid;
+            grid-template-columns:1fr auto;
+            gap:3rem; align-items:center;
+            padding:3.5rem 0 3rem;
+            border-bottom:1px solid var(--border);
+        }
+        .eyebrow {
+            display:inline-flex; align-items:center; gap:0.5rem;
+            font-family:'JetBrains Mono',monospace;
+            font-size:0.73rem; color:var(--cyan);
+            margin-bottom:0.7rem; letter-spacing:0.04em;
+        }
+        .eyebrow::before { content:''; width:16px;height:1px;background:var(--cyan); }
+        .hero h1 {
+            font-size:clamp(2.6rem,5vw,4rem);
+            font-weight:700; letter-spacing:-0.035em;
+            line-height:1.05; margin-bottom:0.5rem;
+        }
+        .grad {
+            color:var(--cyan);
+        }
+        .hero-role { font-size:0.92rem; color:var(--txt-2); margin-bottom:0.85rem; }
+        .hero-bio {
+            font-size:0.88rem; color:var(--txt-3); line-height:1.8;
+            max-width:520px; margin-bottom:1.75rem;
+        }
+        .cta-row { display:flex; gap:0.7rem; flex-wrap:wrap; }
+        .btn {
+            padding:0.6rem 1.3rem;
+            font-family:'JetBrains Mono',monospace; font-size:0.77rem;
+            border-radius:8px; border:none; cursor:pointer;
+            text-decoration:none; display:inline-flex; align-items:center; gap:0.4rem;
+            transition:all 0.2s ease; font-weight:500;
+        }
+        .btn-primary {
+            background:var(--cyan); color:#000; font-weight:600;
+            box-shadow:0 0 24px rgba(0,217,255,0.28);
+        }
+        .btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 30px rgba(0,217,255,0.38); }
+        .btn-amber {
+            background:rgba(0,217,255,0.08); color:var(--cyan);
+            border:1px solid rgba(0,217,255,0.25);
+        }
+        .btn-amber:hover { background:rgba(0,217,255,0.15); transform:translateY(-2px); }
+        .btn-ghost {
+            background:transparent; color:var(--txt-2);
+            border:1px solid var(--border);
+        }
+        .btn-ghost:hover { border-color:rgba(255,255,255,0.2); color:var(--txt-1); }
+
+        /* Stat cards */
+        .stat-col { display:flex; flex-direction:column; gap:0.7rem; }
+        .stat-card {
+            background:var(--card);
+            border:1px solid var(--border);
+            border-radius:12px; padding:1rem 1.5rem;
+            text-align:center; backdrop-filter:blur(8px);
+            min-width:118px;
+            position:relative; overflow:hidden;
+        }
+        .stat-card::before {
+            content:'';
+            position:absolute; top:0; left:0; right:0; height:1px;
+            background:linear-gradient(90deg, transparent, rgba(0,217,255,0.3), transparent);
+        }
+        .stat-num {
+            font-family:'JetBrains Mono',monospace;
+            font-size:1.9rem; font-weight:700; color:var(--cyan); line-height:1;
+        }
+        .stat-lbl { font-size:0.68rem; color:var(--txt-3); margin-top:0.2rem; }
+
+        /* ── Main grid ── */
+        .main-grid {
+            display:grid;
+            grid-template-columns:1fr 300px;
+            gap:1.75rem;
+            padding:2rem 0 3.5rem;
+            align-items:start;
+        }
+
+        /* ── Section heading ── */
+        .sec-tag {
+            font-family:'JetBrains Mono',monospace;
+            font-size:0.68rem; color:var(--cyan);
+            text-transform:uppercase; letter-spacing:0.15em;
+            margin-bottom:0.25rem;
+            display:flex; align-items:center; gap:0.5rem;
+        }
+        .sec-tag::before { content:''; width:12px;height:1px;background:var(--cyan); }
+        .sec-title {
+            font-size:1.3rem; font-weight:700;
+            letter-spacing:-0.025em; margin-bottom:1.2rem;
+        }
+
+        /* ── Experience tabs ── */
+        .tab-bar {
+            display:flex; border-bottom:1px solid var(--border);
+            margin-bottom:1.5rem; overflow-x:auto; scrollbar-width:none;
+        }
+        .tab-bar::-webkit-scrollbar { display:none; }
+        .tab-btn {
+            padding:0.5rem 1rem;
+            background:none; border:none; border-bottom:2px solid transparent;
+            color:var(--txt-3); font-family:'JetBrains Mono',monospace;
+            font-size:0.74rem; cursor:pointer; white-space:nowrap;
+            margin-bottom:-1px; transition:all 0.15s;
+        }
+        .tab-btn:hover { color:var(--txt-1); }
+        .tab-btn.active { color:var(--cyan); border-bottom-color:var(--cyan); }
+
+        .tab-panel { display:none; animation:fadein 0.2s ease; }
+        .tab-panel.active { display:block; }
+        @keyframes fadein { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:none} }
+
+        .exp-title { font-size:1.05rem; font-weight:600; margin-bottom:0.3rem; }
+        .exp-meta {
+            display:flex; flex-wrap:wrap; gap:0.5rem;
+            font-family:'JetBrains Mono',monospace; font-size:0.7rem;
+            color:var(--txt-3); margin-bottom:1rem;
+        }
+        .exp-meta .co { color:var(--amber); }
+        .exp-list { list-style:none; margin-bottom:1rem; }
+        .exp-list li {
+            position:relative; padding:0.3rem 0 0.3rem 1.25rem;
+            color:var(--txt-2); font-size:0.86rem; line-height:1.65;
+        }
+        .exp-list li::before { content:'▹'; position:absolute; left:0; color:var(--cyan); font-size:0.72rem; top:0.42rem; }
+        .tags { display:flex; flex-wrap:wrap; gap:0.32rem; }
+        .tag {
+            font-family:'JetBrains Mono',monospace; font-size:0.67rem;
+            padding:0.22rem 0.52rem;
+            background:rgba(0,217,255,0.06);
+            border:1px solid rgba(0,217,255,0.15);
+            border-radius:4px; color:var(--cyan);
+        }
+
+        /* ── Sidebar ── */
+        .sidebar { display:flex; flex-direction:column; gap:1.1rem; }
+        .card {
+            background:var(--card);
+            border:1px solid var(--border);
+            border-radius:12px; padding:1.2rem;
+            backdrop-filter:blur(8px);
+            position:relative; overflow:hidden;
+        }
+        /* Subtle top highlight line */
+        .card::before {
+            content:'';
+            position:absolute; top:0; left:10%; right:10%; height:1px;
+            background:linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+        }
+        .card-title {
+            font-family:'JetBrains Mono',monospace; font-size:0.75rem;
+            color:var(--cyan); margin-bottom:0.9rem; font-weight:500;
+        }
+
+        /* Skills — inline below experience */
+        .skills-inline {
+            margin-top:1.75rem;
+            padding-top:1.5rem;
+            border-top:1px solid var(--border);
+        }
+        .skills-cat-grid {
+            display:grid;
+            grid-template-columns:repeat(2,1fr);
+            gap:1rem;
+        }
+        .skill-group { }
+        .skill-lbl {
+            font-family:'JetBrains Mono',monospace; font-size:0.62rem;
+            color:var(--txt-3); text-transform:uppercase; letter-spacing:0.1em;
+            margin-bottom:0.38rem;
+        }
+        .chips { display:flex; flex-wrap:wrap; gap:0.28rem; }
+        .chip {
+            font-size:0.72rem; font-family:'JetBrains Mono',monospace;
+            padding:0.25rem 0.6rem; background:rgba(255,255,255,0.06);
+            border-radius:5px; color:var(--txt-1);
+            border:1px solid rgba(255,255,255,0.13);
+        }
+
+        /* Education */
+        .edu-deg { font-size:0.88rem; font-weight:600; margin-bottom:0.2rem; }
+        .edu-uni { font-family:'JetBrains Mono',monospace; font-size:0.73rem; color:var(--cyan); margin-bottom:0.2rem; }
+        .edu-meta { font-family:'JetBrains Mono',monospace; font-size:0.66rem; color:var(--txt-3); }
+
+        /* Awards */
+        .award-row {
+            display:flex; align-items:center; gap:0.65rem;
+            padding:0.45rem 0; border-bottom:1px solid rgba(255,255,255,0.05);
+        }
+        .award-row:last-child { border:none; padding-bottom:0; }
+        .aw-icon { font-size:1rem; flex-shrink:0; }
+        .aw-name { font-size:0.8rem; font-weight:500; }
+        .aw-src { font-family:'JetBrains Mono',monospace; font-size:0.65rem; color:var(--txt-3); }
+
+        /* ── Footer ── */
+        footer { border-top:1px solid var(--border); padding:1.6rem 0; }
+        .foot-inner {
+            max-width:1400px; margin:0 auto;
+            display:flex; justify-content:space-between; align-items:center;
+            flex-wrap:wrap; gap:1rem;
+        }
+        .social-links { display:flex; gap:1.4rem; }
+        .social-links a {
+            color:var(--txt-3); text-decoration:none;
+            font-family:'JetBrains Mono',monospace; font-size:0.76rem;
+            transition:color 0.2s;
+        }
+        .social-links a:hover { color:var(--txt-1); }
+        .copy { font-family:'JetBrains Mono',monospace; font-size:0.7rem; color:var(--txt-3); }
+
+        /* ── Responsive ── */
+        @media (max-width:860px) {
+            .hero { grid-template-columns:1fr; }
+            .stat-col { flex-direction:row; }
+            .main-grid { grid-template-columns:1fr; }
+        }
+        @media (max-width:520px) {
+            .hero h1 { font-size:2.2rem; }
+            .nav-links { gap:0.75rem; }
+            .foot-inner { flex-direction:column; text-align:center; }
+            .wrap { padding:0 1.25rem; }
+        }
+
+        ::selection { background:var(--cyan); color:#000; }
+    </style>
+</head>
+<body>
+
+<div class="bg-scene"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<!-- ── Header ── -->
+<header>
+    <div class="wrap">
+        <nav>
+            <div class="logo">&lt;/Asmin Budha&gt;</div>
+            <ul class="nav-links">
+                <li><a href="#experience">Experience</a></li>
+                <li><a href="#skills">Skills</a></li>
+                <li><a href="#education">Education</a></li>
+                <li><a href="Asmin_Budha.pdf" target="_blank" class="nav-resume">Resume ↗</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+
+<div class="wrap">
+<div class="page">
+
+    <!-- ── Hero ── -->
+    <section class="hero">
+        <div>
+            <div class="eyebrow">Software Developer · Vienna, Austria</div>
+            <h1>Asmin <span class="grad">Budha</span></h1>
+            <p class="hero-role">Senior Software Developer &nbsp;·&nbsp; Cloud-Native &amp; Microservices</p>
+            <p class="hero-bio">
+                Building scalable, high-performance systems with expertise in event-driven
+                architectures and modern cloud technologies. Currently crafting solutions at Quivo.
+            </p>
+            <div class="cta-row">
+                <a href="/cdn-cgi/l/email-protection#6a1e0f191e2a0d070b030644090507" class="btn btn-primary">Get In Touch</a>
+                <a href="Asmin_Budha.pdf" target="_blank" download class="btn btn-amber">Download Resume</a>
+                <a href="https://github.com/yourusername" target="_blank" class="btn btn-ghost">GitHub</a>
+            </div>
+        </div>
+        <div class="stat-col">
+            <div class="stat-card">
+                <div class="stat-num">7+</div>
+                <div class="stat-lbl">Years Exp.</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-num">3</div>
+                <div class="stat-lbl">Companies</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-num">10+</div>
+                <div class="stat-lbl">Technologies</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── Main grid ── -->
+    <div class="main-grid">
+
+        <!-- Left: Experience -->
+        <div id="experience">
+            <div class="sec-tag">Career Journey</div>
+            <h2 class="sec-title">Experience</h2>
+
+            <div class="tab-bar">
+                <button class="tab-btn active" onclick="switchTab(this,'quivo')">Quivo</button>
+                <button class="tab-btn" onclick="switchTab(this,'leapfrog')">Leapfrog</button>
+                <button class="tab-btn" onclick="switchTab(this,'doersbase')">Doersbase</button>
+                <button class="tab-btn" onclick="switchTab(this,'freelance')">Freelance</button>
+            </div>
+
+            <div id="quivo" class="tab-panel active">
+                <div class="exp-title">Senior Software Developer</div>
+                <div class="exp-meta">
+                    <span class="co">Quivo (formerly Logsta)</span>
+                    <span>Vienna, Austria</span>
+                    <span>Dec 2021 – Present</span>
+                </div>
+                <ul class="exp-list">
+                    <li>Implemented quick rollback in deployment pipeline, completing in under a minute</li>
+                    <li>Led Shopify API migration from REST to GraphQL, reducing latency by 30%</li>
+                    <li>Optimized search performance by 40% via pre-aggregation and ElasticSearch refinements</li>
+                    <li>Architected Stripe Integration for automated subscription payments</li>
+                    <li>Designed conditional TTL-based record removal in DynamoDB, cutting operational costs</li>
+                    <li>Enhanced CI/CD pipelines with GitHub Actions; developed Pop-up Notification System</li>
+                </ul>
+                <div class="tags">
+                    <span class="tag">Java</span><span class="tag">NodeJS</span>
+                    <span class="tag">GraphQL</span><span class="tag">AWS Lambda</span>
+                    <span class="tag">DynamoDB</span><span class="tag">ElasticSearch</span>
+                    <span class="tag">Docker</span><span class="tag">MariaDB</span>
+                </div>
+            </div>
+
+            <div id="leapfrog" class="tab-panel">
+                <div class="exp-title">Software Engineer</div>
+                <div class="exp-meta">
+                    <span class="co">Leapfrog Technology</span>
+                    <span>Kathmandu, Nepal</span>
+                    <span>Jan 2019 – Nov 2021</span>
+                </div>
+                <ul class="exp-list">
+                    <li>Optimized QR code scanning to process 50 codes within seconds using BoofCV SDK</li>
+                    <li>Contributed to <em>react-native-camera</em> open-source library</li>
+                    <li>Reduced memory leaks through profiling and efficient caching with Reselect</li>
+                    <li>Integrated multiple authentication methods including LDAP and Cognito</li>
+                </ul>
+                <div class="tags">
+                    <span class="tag">React</span><span class="tag">React Native</span>
+                    <span class="tag">Android</span><span class="tag">Micronaut</span>
+                    <span class="tag">Java</span><span class="tag">Firebase</span>
+                    <span class="tag">PostgreSQL</span>
+                </div>
+            </div>
+
+            <div id="doersbase" class="tab-panel">
+                <div class="exp-title">Software Engineer</div>
+                <div class="exp-meta">
+                    <span class="co">Doersbase Softudio</span>
+                    <span>Butwal, Nepal</span>
+                    <span>Jan 2017 – Jul 2018</span>
+                </div>
+                <ul class="exp-list">
+                    <li>Designed robust accounting desktop application using Java and Swing</li>
+                    <li>Developed dynamic websites using WordPress and PHP</li>
+                    <li>Built Android applications enhancing user engagement</li>
+                </ul>
+                <div class="tags">
+                    <span class="tag">Java</span><span class="tag">Swing</span>
+                    <span class="tag">MySQL</span><span class="tag">Android</span>
+                    <span class="tag">WordPress</span>
+                </div>
+            </div>
+
+            <div id="freelance" class="tab-panel">
+                <div class="exp-title">Freelance Projects</div>
+                <div class="exp-meta"><span class="co">Independent</span></div>
+                <ul class="exp-list">
+                    <li><strong>Safer Siren</strong> — Background location service for real-time geolocation monitoring</li>
+                    <li><strong>Habitat Nepal</strong> — Module to track house designs by location and type</li>
+                </ul>
+                <div class="tags">
+                    <span class="tag">React Native</span><span class="tag">Android</span>
+                    <span class="tag">MQTT</span><span class="tag">Firebase</span>
+                </div>
+            </div>
+
+            <!-- Skills below experience -->
+            <div class="skills-inline" id="skills">
+                <div class="sec-tag">Technical Expertise</div>
+                <h2 class="sec-title">Skills</h2>
+                <div class="skills-cat-grid">
+                    <div class="skill-group">
+                        <div class="skill-lbl">Architecture</div>
+                        <div class="chips">
+                            <span class="chip">Microservices</span>
+                            <span class="chip">Event-Driven</span>
+                            <span class="chip">RESTful</span>
+                            <span class="chip">AWS SNS/SQS</span>
+                        </div>
+                    </div>
+                    <div class="skill-group">
+                        <div class="skill-lbl">Languages & Frameworks</div>
+                        <div class="chips">
+                            <span class="chip">Java</span><span class="chip">JavaScript</span>
+                            <span class="chip">NodeJS</span><span class="chip">React</span>
+                            <span class="chip">React Native</span><span class="chip">Micronaut</span>
+                            <span class="chip">C++</span><span class="chip">Android</span>
+                        </div>
+                    </div>
+                    <div class="skill-group">
+                        <div class="skill-lbl">Cloud & DevOps</div>
+                        <div class="chips">
+                            <span class="chip">AWS Lambda</span><span class="chip">EC2</span>
+                            <span class="chip">S3</span><span class="chip">Docker</span>
+                            <span class="chip">Kubernetes</span><span class="chip">GitHub Actions</span>
+                            <span class="chip">Step Functions</span>
+                        </div>
+                    </div>
+                    <div class="skill-group">
+                        <div class="skill-lbl">Databases</div>
+                        <div class="chips">
+                            <span class="chip">PostgreSQL</span><span class="chip">MariaDB</span>
+                            <span class="chip">DynamoDB</span><span class="chip">MongoDB</span>
+                            <span class="chip">Elasticsearch</span><span class="chip">MySQL</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Sidebar -->
+        <aside class="sidebar">
+
+            <div class="card" id="education">
+                <div class="card-title">// Education</div>
+                <div class="edu-deg">B.Sc. Computer Science &amp; IT</div>
+                <div class="edu-uni">Tribhuvan University</div>
+                <div class="edu-meta">Oct 2014 – Dec 2018 &nbsp;·&nbsp; 71.93%</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">// Awards &amp; Certs</div>
+                <div class="award-row">
+                    <div class="aw-icon">🏆</div>
+                    <div><div class="aw-name">National Programming Contest</div><div class="aw-src">Winner · 2017</div></div>
+                </div>
+                <div class="award-row">
+                    <div class="aw-icon">🔧</div>
+                    <div><div class="aw-name">react-native-camera</div><div class="aw-src">Open Source Contributor</div></div>
+                </div>
+                <div class="award-row">
+                    <div class="aw-icon">📚</div>
+                    <div><div class="aw-name">Database Engineering</div><div class="aw-src">Udemy · 2021</div></div>
+                </div>
+                <div class="award-row">
+                    <div class="aw-icon">💻</div>
+                    <div><div class="aw-name">Problem Solving (Advanced)</div><div class="aw-src">HackerRank · 2020</div></div>
+                </div>
+                <div class="award-row">
+                    <div class="aw-icon">🎓</div>
+                    <div><div class="aw-name">Microservices with Containers</div><div class="aw-src">O'Reilly</div></div>
+                </div>
+                <div class="award-row">
+                    <div class="aw-icon">🎓</div>
+                    <div><div class="aw-name">Apache Kafka for Beginners</div><div class="aw-src">O'Reilly</div></div>
+                </div>
+            </div>
+
+        </aside>
+    </div>
+
+</div>
+</div>
+
+<footer>
+    <div class="wrap">
+        <div class="foot-inner">
+            <div class="social-links">
+                <a href="mailto:budha.asmin@gmail.com">Email</a>
+                <a href="https://linkedin.com/in/asminbudha" target="_blank">LinkedIn</a>
+                <a href="https://github.com/asminbudha" target="_blank">GitHub</a>
+            </div>
+            <div class="copy">© 2026 Asmin Budha. Built with passion for clean code.</div>
+        </div>
+    </div>
+</footer>
+
+<script>
+    function switchTab(btn, id) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(id).classList.add('active');
+    }
+</script>
+</body>
 </html>
